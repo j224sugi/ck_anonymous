@@ -1,10 +1,10 @@
 package com.github.mauricioaniche.ck;
 
-import com.github.mauricioaniche.ck.util.FileUtils;
-
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
+
+import com.github.mauricioaniche.ck.util.FileUtils;
 
 public class Runner {
 
@@ -45,7 +45,7 @@ public class Runner {
 
 		ResultWriter writer = new ResultWriter(outputDir + "class.csv", outputDir + "method.csv", outputDir + "variable.csv", outputDir + "field.csv", variablesAndFields);
 		
-		Map<String, CKClassResult> results = new HashMap<>();
+		Map<String, CKClassResult> results = new IdentityHashMap<>();
 		
 		new CK(useJars, maxAtOnce, variablesAndFields).calculate(path, new CKNotifier() {
 			@Override
