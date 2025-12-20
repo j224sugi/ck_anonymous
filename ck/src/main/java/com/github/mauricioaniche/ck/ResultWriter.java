@@ -13,7 +13,7 @@ public class ResultWriter {
             "file",
             "class",
             "type",
-
+            "line",
             /* OO Metrics */
             "cbo",
             "cboModified",
@@ -152,6 +152,7 @@ public class ResultWriter {
                 result.getFile(),
                 result.getClassName(),
                 result.getType(),
+                result.getLine(),
 
                 /* OO Metrics */
                 result.getCbo(),

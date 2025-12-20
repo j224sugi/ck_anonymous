@@ -154,7 +154,17 @@ public class CKVisitor extends ASTVisitor {
         this.classes = new Stack<>();
         this.collectedClasses = new HashSet<>();
     }
-	
+
+    public int getLineStartNumber(ASTNode node) {
+        if (node.getStartPosition() != -1) {
+            int nodePosition = node.getStartPosition();
+            int nodeStartLine = cu.getLineNumber(nodePosition);
+            return nodeStartLine;
+        } else {
+            return 0;
+        }
+    }
+
     @Override
     public boolean visit(TypeDeclaration node) {
         ITypeBinding binding = node.resolveBinding();
@@ -162,14 +172,14 @@ public class CKVisitor extends ASTVisitor {
         // build a CKClassResult based on the current type
         // declaration we are visiting
         String className = node.getName().getFullyQualifiedName();
-        boolean cuHasPackage=true;
-		String packageName;
-		if(cu.getPackage()!=null){
-			packageName=cu.getPackage().getName().getFullyQualifiedName();
-		}else{
-			packageName="";
-			cuHasPackage=false;
-		}
+        boolean cuHasPackage = true;
+        String packageName;
+        if (cu.getPackage() != null) {
+            packageName = cu.getPackage().getName().getFullyQualifiedName();
+        } else {
+            packageName = "";
+            cuHasPackage = false;
+        }
         boolean hasNotPackage = true;
         if (binding != null) {
             className = binding.getBinaryName();
@@ -177,7 +187,7 @@ public class CKVisitor extends ASTVisitor {
                 hasNotPackage = false;
             }
         }
-        if (hasNotPackage&&cuHasPackage) {
+        if (hasNotPackage && cuHasPackage) {
             List<String> classList = new ArrayList<>();
             ASTNode tmpNode = node;
             while (tmpNode != null) {
@@ -208,7 +218,7 @@ public class CKVisitor extends ASTVisitor {
         }
         String type = getTypeOfTheUnit(node);
         int modifiers = node.getModifiers();
-        CKClassResult currentClass = new CKClassResult(sourceFilePath, className, type, modifiers);
+        CKClassResult currentClass = new CKClassResult(sourceFilePath, className, type, modifiers,getLineStartNumber(node));
         currentClass.setLoc(calculate(node.toString()));
 
         // there might be metrics that use it
@@ -266,11 +276,11 @@ public class CKVisitor extends ASTVisitor {
         String currentQualifiedMethodName = JDTUtils.getQualifiedMethodFullName(node);
         boolean isConstructor = node.isConstructor();
 
-        String className
-                = ((currentQualifiedMethodName.lastIndexOf(currentMethodName) - 1) > 0)
-                ? currentQualifiedMethodName.substring(0,
-                        (currentQualifiedMethodName.lastIndexOf(currentMethodName) - 1))
-                : "";
+        String className =
+                ((currentQualifiedMethodName.lastIndexOf(currentMethodName) - 1) > 0)
+                        ? currentQualifiedMethodName.substring(0,
+                                (currentQualifiedMethodName.lastIndexOf(currentMethodName) - 1))
+                        : "";
 
         CKMethodResult currentMethod = new CKMethodResult(currentMethodName,
                 currentQualifiedMethodName, isConstructor, node.getModifiers());
@@ -281,8 +291,8 @@ public class CKVisitor extends ASTVisitor {
         currentMethod.setStartLine(methodStartLine);
 
         // let's instantiate method level visitors for this current method
-        List<MethodLevelMetric> methodLevelMetrics
-                = instantiateMethodLevelMetricVisitors(currentQualifiedMethodName);
+        List<MethodLevelMetric> methodLevelMetrics =
+                instantiateMethodLevelMetricVisitors(currentQualifiedMethodName);
 
         // we add it to the current class we are visiting
         MethodInTheStack methodInTheStack = new MethodInTheStack();
@@ -340,13 +350,13 @@ public class CKVisitor extends ASTVisitor {
         int anonymousline = cu.getLineNumber(anonymousposition);
 
         String anonClassName = classes.peek().result.getClassName() + "$Anonymous" + anonymousline;
-        CKClassResult currentClass
-                = new CKClassResult(sourceFilePath, anonClassName, "anonymous", -1);
+        CKClassResult currentClass =
+                new CKClassResult(sourceFilePath, anonClassName, "anonymous", -1,anonymousline);
         currentClass.setLoc(calculate(node.toString()));
 
         // create a set of visitors, just for the current class
-        List<ClassLevelMetric> classLevelMetrics
-                = instantiateClassLevelMetricVisitors(anonClassName);
+        List<ClassLevelMetric> classLevelMetrics =
+                instantiateClassLevelMetricVisitors(anonClassName);
 
         // store everything in a 'class in the stack' data structure
         ClassInTheStack classInTheStack = new ClassInTheStack();
@@ -395,8 +405,8 @@ public class CKVisitor extends ASTVisitor {
         currentMethod.setStartLine(JDTUtils.getStartLine(cu, node));
 
         // let's instantiate method level visitors for this current method
-        List<MethodLevelMetric> methodLevelMetrics
-                = instantiateMethodLevelMetricVisitors(currentMethodName);
+        List<MethodLevelMetric> methodLevelMetrics =
+                instantiateMethodLevelMetricVisitors(currentMethodName);
 
         // we add it to the current class we are visiting
         MethodInTheStack methodInTheStack = new MethodInTheStack();
@@ -452,13 +462,13 @@ public class CKVisitor extends ASTVisitor {
         // build a CKClassResult based on the current type
         // declaration we are visiting
         String packageName;
-		boolean cuHasPackage=true;
-		if(cu.getPackage()!=null){
-			packageName=cu.getPackage().getName().getFullyQualifiedName();
-		}else{
-			packageName="";
-			cuHasPackage=false;
-		}
+        boolean cuHasPackage = true;
+        if (cu.getPackage() != null) {
+            packageName = cu.getPackage().getName().getFullyQualifiedName();
+        } else {
+            packageName = "";
+            cuHasPackage = false;
+        }
         boolean hasNotPackage = true;
 
         String className = node.getName().getFullyQualifiedName();
@@ -468,7 +478,7 @@ public class CKVisitor extends ASTVisitor {
                 hasNotPackage = false;
             }
         }
-        if (hasNotPackage&&cuHasPackage) {
+        if (hasNotPackage && cuHasPackage) {
             List<String> classList = new ArrayList<>();
             ASTNode tmpNode = node;
             while (tmpNode != null) {
@@ -501,7 +511,7 @@ public class CKVisitor extends ASTVisitor {
         }
         String type = "enum";
         int modifiers = node.getModifiers();
-        CKClassResult currentClass = new CKClassResult(sourceFilePath, className, type, modifiers);
+        CKClassResult currentClass = new CKClassResult(sourceFilePath, className, type, modifiers,getLineStartNumber(node));
         currentClass.setLoc(calculate(node.toString()));
 
         // create a set of visitors, just for the current class

@@ -1,6 +1,10 @@
 package com.github.mauricioaniche.ck;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import com.github.mauricioaniche.ck.metric.CouplingExtras;
 import com.github.mauricioaniche.ck.metric.NOCExtras;
@@ -10,7 +14,7 @@ public class CKClassResult {
 	private String file;
 	private String className;
 	private String type;
-
+	private int line;
 	private int dit;
 	private int noc = -1;
 	private int wmc;
@@ -66,13 +70,14 @@ public class CKClassResult {
 	private float tightClassCohesion;
 	private float looseClassCohesion;
 
-	public CKClassResult(String file, String className, String type, int modifiers) {
+	public CKClassResult(String file, String className, String type, int modifiers,int line) {
 		this.file = file;
 		this.className = className;
 		this.type = type;
 		this.methods = new HashSet<>();
 		this.visibleMethods= new HashSet<>();
 		this.modifiers = modifiers;
+		this.line=line;
 	}
 
 	/**
@@ -87,6 +92,10 @@ public class CKClassResult {
 	
 	public String getFile() {
 		return file;
+	}
+
+	public int getLine(){
+		return line;
 	}
 
 	public int getDit() {
